@@ -56,6 +56,20 @@ namespace EmployeeManagementSystem.Tests
             Assert.Contains(result, e => e.FullName == "Jane Smith" && e.RoleName == "Manager");
         }
 
+        [Fact]
+        public async Task GetAllEmployees_ReturnsEmptyList_WhenNoEmployeesExist()
+        {
+            // Arrange
+            _mockEmployeeRepo.Setup(r => r.GetAllEmployees()).ReturnsAsync(new List<Employee>());
+
+            // Act
+            var result = await _employeeService.GetAllEmployees();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+        }
+
         // ========== GetEmployeeById ==========
         [Fact]
         public async Task GetEmployeeById_ReturnsMappedEmployee_WhenUserIsAdminAndEmployeeExists()
@@ -217,6 +231,17 @@ namespace EmployeeManagementSystem.Tests
             Assert.Equal("Developer", result.Position);
             Assert.Equal(new DateTime(2020, 1, 1).ToString("yyyy-MM-dd"), result.DateOfHire);
             Assert.Equal("Engineer", result.RoleName);
+
+            // Verify
+            _mockEmployeeRepo.Verify(r => r.CreateEmployee(It.Is<Employee>(employee =>
+                employee.FirstName == "Alice" &&
+                employee.LastName == "Smith" &&
+                employee.Email == "alice@example.com" &&
+                employee.Age == 30 &&
+                employee.Phone == "1234567890" &&
+                employee.Position == "Developer" &&
+                employee.RoleId == roleId
+            )), Times.Once);
         }
 
         [Fact]
@@ -297,6 +322,7 @@ namespace EmployeeManagementSystem.Tests
             Assert.True(result.success);
             Assert.Null(result.Error);
 
+            // Verify
             _mockEmployeeRepo.Verify(r => r.DeleteEmployee(mockEmployee), Times.Once);
         }
 
@@ -312,6 +338,9 @@ namespace EmployeeManagementSystem.Tests
             // Assert
             Assert.False(result.success);
             Assert.Equal("EmployeeNotFound", result.Error);
+
+            // Verify
+            _mockEmployeeRepo.Verify(r => r.DeleteEmployee(It.IsAny<Employee>()), Times.Never);
         }
 
         [Fact]
@@ -341,6 +370,9 @@ namespace EmployeeManagementSystem.Tests
             // Assert
             Assert.False(result.success);
             Assert.Equal("EmployeeWithUser", result.Error);
+
+            // Verify
+            _mockEmployeeRepo.Verify(r => r.DeleteEmployee(It.IsAny<Employee>()), Times.Never);
         }
 
         // ========== UpdateEmployee ==========
@@ -388,6 +420,17 @@ namespace EmployeeManagementSystem.Tests
             var result = await _employeeService.UpdateEmployee(employeeRequestedId, mockEmployeeUpdateDto, principal);
 
             // Assert
+            Assert.True(result.Success);
+            Assert.Null(result.Error);
+            Assert.Equal("Gina Jones", result.employeeReadDto.FullName);
+            Assert.Equal(20, result.employeeReadDto.Age);
+            Assert.Equal("gina@example.com", result.employeeReadDto.Email);
+            Assert.Equal("1234567890", result.employeeReadDto.Phone);
+            Assert.Equal("Developer", result.employeeReadDto.Position);
+            Assert.Equal("2020-01-01", result.employeeReadDto.DateOfHire);
+            Assert.Equal("Engineer", result.employeeReadDto.RoleName);
+
+            // Verify
             _mockEmployeeRepo.Verify(repo => repo.UpdateEmployee(It.Is<Employee>(e =>
                 e.FirstName == "Gina" &&
                 e.LastName == "Jones" &&
@@ -440,6 +483,17 @@ namespace EmployeeManagementSystem.Tests
             var result = await _employeeService.UpdateEmployee(employeeRequestedId, mockEmployeeUpdateDto, principal);
 
             // Assert
+            Assert.True(result.Success);
+            Assert.Null(result.Error);
+            Assert.Equal("Gina Jones", result.employeeReadDto.FullName);
+            Assert.Equal(20, result.employeeReadDto.Age);
+            Assert.Equal("gina@example.com", result.employeeReadDto.Email);
+            Assert.Equal("1234567890", result.employeeReadDto.Phone);
+            Assert.Equal("Developer", result.employeeReadDto.Position);
+            Assert.Equal("2020-01-01", result.employeeReadDto.DateOfHire);
+            Assert.Equal("Engineer", result.employeeReadDto.RoleName);
+
+            // Verify
             _mockEmployeeRepo.Verify(repo => repo.UpdateEmployee(It.Is<Employee>(e =>
                 e.FirstName == "Gina" &&
                 e.LastName == "Jones" &&
