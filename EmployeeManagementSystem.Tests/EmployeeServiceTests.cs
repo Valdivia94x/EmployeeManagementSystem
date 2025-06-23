@@ -107,6 +107,9 @@ namespace EmployeeManagementSystem.Tests
             Assert.NotNull(result);
             Assert.Equal("Alice Smith", result.FullName);
             Assert.Equal("Engineer", result.RoleName);
+
+            // Verify
+            _mockEmployeeRepo.Verify(r => r.GetEmployeeById(employeeRequestedId), Times.Once);
         }
 
         [Fact]
@@ -157,14 +160,12 @@ namespace EmployeeManagementSystem.Tests
 
             var principal = CreateClaims(userId, "Employee");
 
-            // fake user
-            var mockUser = new User { Id = userId, EmployeeId = userEmployeeId };
-
-            _mockUserRepo.Setup(r => r.GetUserById(userId)).ReturnsAsync(mockUser);
-
             // Act & Assert
             await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
                 _employeeService.GetEmployeeById(employeeRequestedId, principal));
+
+            // Verify
+            _mockEmployeeRepo.Verify(r => r.GetEmployeeById(It.IsAny<int>()), Times.Never);
         }
 
         [Fact]

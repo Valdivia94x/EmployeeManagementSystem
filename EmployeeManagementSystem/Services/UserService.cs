@@ -34,7 +34,7 @@ namespace EmployeeManagementSystem.Services
             await checkUserPermissions(id, user, "view");
 
             User userRequested = await _userRepository.GetUserById(id);
-            if (user == null)
+            if (userRequested == null)
             {
                 return null;
             }
@@ -45,6 +45,12 @@ namespace EmployeeManagementSystem.Services
 
         public async Task<UserReadDto> CreateUser(UserCreateDto userDto)
         {
+            var existingUser = await _userRepository.GetUserByUsername(userDto.Username);
+            if (existingUser != null)
+            {
+                _logger.LogWarning("User with username {Username} already exists.", userDto.Username);
+                throw new InvalidOperationException($"User with username {userDto.Username} already exists.");
+            }
             var existingUserWithEmployee = await _userRepository.GetByEmployeeId(userDto.EmployeeId);
 
             if (existingUserWithEmployee != null)
@@ -117,7 +123,7 @@ namespace EmployeeManagementSystem.Services
                 }
 
                 // To check if employee is linked to another user
-                var existingUserWithEmployee = await _userRepository.GetByEmployeeId(updateUser.EmployeeId.Value);
+                var existingUserWithEmployee = await _userRepository.GetByEmployeeId(idUpdate);
 
                 if (existingUserWithEmployee != null && existingUserWithEmployee.Id != userToUpdate.Id)
                 {

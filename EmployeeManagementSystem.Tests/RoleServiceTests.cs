@@ -45,9 +45,9 @@ namespace EmployeeManagementSystem.Tests
 
             // Assert
             Assert.Equal(3, result.Count);
-            Assert.Contains(result, e => e.Id == 1 && e.Name == "Admin");
-            Assert.Contains(result, e => e.Id == 2 && e.Name == "HR");
-            Assert.Contains(result, e => e.Id == 3 && e.Name == "Employee");
+            Assert.Contains(result, r => r.Id == 1 && r.Name == "Admin");
+            Assert.Contains(result, r => r.Id == 2 && r.Name == "HR");
+            Assert.Contains(result, r => r.Id == 3 && r.Name == "Employee");
         }
 
         [Fact]
@@ -86,6 +86,9 @@ namespace EmployeeManagementSystem.Tests
             Assert.NotNull(result);
             Assert.Equal(1, result.Id);
             Assert.Equal("Admin", result.Name);
+
+            // Verify
+            _mockRoleRepo.Verify(r => r.GetRoleById(roleRequestedId), Times.Once);
         }
 
         [Fact]
